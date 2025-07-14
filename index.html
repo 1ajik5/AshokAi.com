@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Ashok AI Chatbot</title>
+    <!-- Tailwind CSS CDN for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the chatbot */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); /* Deeper, more vibrant gradient */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: background 0.5s ease; /* Smooth transition for dark mode */
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 700px; /* Slightly wider for a more spacious feel */
+            height: 90vh; /* Taller for more chat history visibility */
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff;
+            border-radius: 1.75rem; /* Even more rounded corners */
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3); /* Deeper, softer shadow */
+            overflow: hidden;
+            transition: background-color 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+        }
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.75rem 2rem; /* More padding */
+            background: linear-gradient(45deg, #1e3a8a, #4c1d95); /* Darker, richer gradient header */
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-top-left-radius: 1.75rem;
+            border-top-right-radius: 1.75rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* More pronounced header shadow */
+        }
+        .chat-header h1 {
+            font-size: 2.25rem; /* Larger, more impactful title */
+            font-weight: 900; /* Ultra bold */
+            letter-spacing: -0.03em; /* Tighter letter spacing for modern look */
+            margin: 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Subtle text shadow */
+        }
+        .ashok-ai-label {
+            font-size: 1.3rem; /* Slightly larger label */
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+            margin-left: auto;
+            text-shadow: 0.5px 0.5px 2px rgba(0, 0, 0, 0.1);
+        }
+        .header-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem; /* More space between buttons */
+            width: 100%;
+            margin-top: 1.5rem; /* More space below title/label */
+        }
+        .header-button {
+            background-color: rgba(255, 255, 255, 0.2); /* Slightly less opaque for a softer look */
+            color: white;
+            padding: 0.7rem 1.4rem; /* More padding */
+            border-radius: 1rem; /* More rounded buttons */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Softer, larger shadow */
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+        }
+        .header-button:hover {
+            background-color: rgba(255, 255, 255, 0.35);
+            transform: translateY(-3px); /* More dynamic hover effect */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+        }
+        .header-button:active {
+            background-color: rgba(255, 255, 255, 0.45);
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .header-button:disabled {
+            opacity: 0.4; /* More transparent when disabled */
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 2rem; /* More padding */
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem; /* More space between messages */
+            background-color: #fcfcfc; /* Very light background */
+            transition: background-color 0.4s ease;
+        }
+        .message {
+            max-width: 88%; /* Wider messages */
+            padding: 1.1rem 1.5rem; /* More padding */
+            border-radius: 1.25rem; /* More rounded message bubbles */
+            word-wrap: break-word;
+            font-size: 1rem; /* Standard font size */
+            line-height: 1.6;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Slightly more prominent message shadow */
+            animation: fadeIn 0.3s ease-out; /* Fade in animation for new messages */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message {
+            align-self: flex-end;
+            background-color: #4a90e2; /* Modern blue for user messages */
+            color: white;
+            border-bottom-right-radius: 0.75rem; /* Consistent rounding */
+        }
+        .bot-message {
+            align-self: flex-start;
+            background-color: #e6f0ff; /* Lighter, softer blue for bot messages */
+            color: #333; /* Darker text for better contrast */
+            border-bottom-left-radius: 0.75rem; /* Consistent rounding */
+        }
+        .chat-input-area {
+            display: flex;
+            padding: 1.5rem 2rem; /* More padding */
+            border-top: 1px solid #e0e0e0;
+            background-color: #ffffff;
+            transition: background-color 0.4s ease, border-color 0.4s ease;
+        }
+        .chat-input {
+            flex-grow: 1;
+            padding: 1rem 1.5rem; /* More padding */
+            border: 1px solid #c0c0c0; /* Softer border */
+            border-radius: 1.25rem; /* More rounded input */
+            outline: none;
+            font-size: 1.05rem; /* Slightly larger font */
+            transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08); /* Deeper inner shadow */
+        }
+        .chat-input:focus {
+            border-color: #6a11cb; /* Matches body gradient start color */
+            box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.3); /* More prominent focus ring */
+        }
+        .send-button {
+            background-color: #6a11cb; /* Matches body gradient start color */
+            color: white;
+            padding: 1rem 1.8rem; /* More padding */
+            border: none;
+            border-radius: 1.25rem; /* More rounded */
+            margin-left: 1rem; /* More margin */
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 700;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 8px 20px rgba(106, 17, 203, 0.4); /* Stronger shadow */
+        }
+        .send-button:hover {
+            background-color: #5a0eb0; /* Darker on hover */
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(106, 17, 203, 0.5);
+        }
+        .send-button:active {
+            background-color: #4a0c90;
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .loading-indicator {
+            text-align: center;
+            padding: 1.25rem; /* More padding */
+            color: #777; /* Softer gray */
+            font-style: italic;
+            transition: color 0.3s ease;
+            font-size: 0.95rem;
+        }
+        .user-id-display {
+            font-size: 0.7rem; /* Slightly smaller font for ID */
+            color: #b0b0b0; /* Lighter color */
+            padding: 0.6rem 2rem; /* Consistent padding */
+            text-align: right;
+            background-color: #f5f5f5; /* Slight background for visibility */
+            border-top: 1px solid #e8e8e8;
+            border-bottom-left-radius: 1.75rem;
+            border-bottom-right-radius: 1.75rem;
+            transition: color 0.3s ease, background-color 0.3s ease;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+        }
+        .chat-container.dark-mode {
+            background-color: #2d3748;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+        }
+        .chat-header.dark-mode {
+            background: linear-gradient(45deg, #1a202c, #2c313a);
+            border-bottom-color: #4a5568;
+        }
+        .ashok-ai-label.dark-mode {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .header-button.dark-mode {
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        .header-button.dark-mode:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+        .chat-messages.dark-mode {
+            background-color: #2c313a;
+        }
+        .bot-message.dark-mode {
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .chat-input-area.dark-mode {
+            background-color: #2d3748;
+            border-top-color: #4a5568;
+        }
+        .chat-input.dark-mode {
+            background-color: #4a5568;
+            border-color: #6b7280;
+            color: #e2e8f0;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .chat-input.dark-mode:focus {
+            border-color: #6a11cb;
+            box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.5);
+        }
+        .chat-input.dark-mode::placeholder {
+            color: #a0aec0;
+        }
+        .send-button.dark-mode {
+            background-color: #6a11cb;
+            box-shadow: 0 8px 20px rgba(106, 17, 203, 0.5);
+        }
+        .send-button.dark-mode:hover {
+            background-color: #5a0eb0;
+            box-shadow: 0 12px 25px rgba(106, 17, 203, 0.6);
+        }
+        .loading-indicator.dark-mode {
+            color: #a0aec0;
+        }
+        .user-id-display.dark-mode {
+            color: #6b7280;
+            background-color: #2d3748;
+            border-top-color: #4a5568;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .chat-container {
+                height: 95vh;
+                border-radius: 1.25rem;
+            }
+            .chat-header {
+                flex-direction: column;
+                align-items: center;
+                padding: 1.25rem;
+                border-top-left-radius: 1.25rem;
+                border-top-right-radius: 1.25rem;
+            }
+            .chat-header h1 {
+                font-size: 1.8rem;
+                margin-bottom: 0.6rem;
+            }
+            .ashok-ai-label {
+                margin-left: 0;
+                margin-bottom: 1rem;
+                font-size: 1.1rem;
+            }
+            .header-buttons {
+                gap: 0.6rem;
+            }
+            .header-button {
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+                border-radius: 0.8rem;
+            }
+            .chat-messages {
+                padding: 1.25rem;
+                gap: 1rem;
+            }
+            .message {
+                padding: 0.9rem 1.1rem;
+                border-radius: 1rem;
+                font-size: 0.92rem;
+            }
+            .chat-input-area {
+                padding: 1rem 1.25rem;
+            }
+            .chat-input, .send-button {
+                font-size: 0.95rem;
+                padding: 0.8rem 1.2rem;
+                border-radius: 1rem;
+            }
+            .user-id-display {
+                padding: 0.5rem 1.25rem;
+                font-size: 0.65rem;
+                border-bottom-left-radius: 1.25rem;
+                border-bottom-right-radius: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container" id="chat-container">
+        <div class="chat-header" id="chat-header">
+            <h1>Ashok AI Chatbot</h1>
+            <span class="ashok-ai-label" id="ashok-ai-label">Ashok AI</span>
+            <div class="header-buttons">
+                <button id="clear-chat-button" class="header-button">Clear Chat</button>
+                <button id="summarize-chat-button" class="header-button">✨ Summarize Chat</button>
+                <button id="elaborate-button" class="header-button">✨ Elaborate</button>
+                <button id="dark-mode-toggle" class="header-button">Toggle Dark Mode</button>
+            </div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Initial bot message -->
+            <div class="message bot-message">Hello! How can I help you today?</div>
+        </div>
+        <div class="loading-indicator" id="loading-indicator" style="display: none;">
+            Thinking...
+        </div>
+        <div class="chat-input-area" id="chat-input-area">
+            <input type="text" id="user-input" class="chat-input" placeholder="Type your message...">
+            <button id="send-button" class="send-button">Send</button>
+        </div>
+        <div class="user-id-display" id="user-id-display"></div>
+    </div>
+
+    <script>
+        // Get references to HTML elements
+        const chatContainer = document.getElementById('chat-container');
+        const chatHeader = document.getElementById('chat-header');
+        const ashokAiLabel = document.getElementById('ashok-ai-label');
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const clearChatButton = document.getElementById('clear-chat-button');
+        const summarizeChatButton = document.getElementById('summarize-chat-button');
+        const elaborateButton = document.getElementById('elaborate-button');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const chatInputArea = document.getElementById('chat-input-area');
+        const userIdDisplay = document.getElementById('user-id-display');
+
+        // Initialize chat history for the API call
+        let chatHistory = [];
+        let isDarkMode = false; // State for dark mode
+
+        // Define specific Q&A about Ashok Kumar Ray
+        const ashokInfo = {
+            "name": "Ashok Kumar Ray",
+            "address": "Sarlahi, Nepal",
+            "college": "Himalayan Whitehouse International College, Tinkune, Kathmandu"
+        };
+
+        /**
+         * Converts basic Markdown to HTML for display.
+         * Supports: **bold**, *italic*, `code`, and newlines.
+         * @param {string} markdownText - The text containing basic markdown.
+         * @returns {string} HTML string.
+         */
+        function convertMarkdownToHtml(markdownText) {
+            let htmlText = markdownText;
+
+            // Convert newlines to <br> tags
+            htmlText = htmlText.replace(/\n/g, '<br>');
+
+            // Bold: **text**
+            htmlText = htmlText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            // Italic: *text*
+            htmlText = htmlText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+            // Inline code: `code`
+            htmlText = htmlText.replace(/`(.*?)`/g, '<code class="bg-gray-200 dark:bg-gray-600 px-1 py-0.5 rounded text-sm">$1</code>');
+
+            return htmlText;
+        }
+
+        /**
+         * Adds a message to the chat display.
+         * @param {string} text - The message text.
+         * @param {string} sender - 'user' or 'bot'.
+         */
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            if (sender === 'user') {
+                messageDiv.classList.add('user-message');
+            } else {
+                messageDiv.classList.add('bot-message');
+                if (isDarkMode) {
+                    messageDiv.classList.add('dark-mode');
+                }
+                messageDiv.innerHTML = convertMarkdownToHtml(text);
+            }
+
+            if (sender === 'user') {
+                messageDiv.textContent = text;
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        /**
+         * Disables or enables all interactive elements during an API call.
+         * @param {boolean} disable - True to disable, false to enable.
+         */
+        function setInteractiveElementsDisabled(disable) {
+            sendButton.disabled = disable;
+            clearChatButton.disabled = disable;
+            summarizeChatButton.disabled = disable;
+            elaborateButton.disabled = disable;
+            darkModeToggle.disabled = disable;
+            userInput.disabled = disable;
+            loadingIndicator.style.display = disable ? 'block' : 'none';
+        }
+
+        /**
+         * Sends a prompt to the Gemini API and handles the response.
+         * @param {Array} currentChatHistory - The chat history to send to the API.
+         * @param {string} errorContextMessage - Message to display if an error occurs.
+         * @returns {Promise<string|null>} The bot's response text, or null if an error.
+         */
+        async function callGeminiAPI(currentChatHistory, errorContextMessage) {
+            setInteractiveElementsDisabled(true);
+            console.log("Calling Gemini API with history:", currentChatHistory); // Debug log
+
+            try {
+                const payload = { contents: currentChatHistory };
+                // API Key is now inserted here
+                const apiKey = "AIzaSyCWIAQYeFPhWzfN4jMY4O07CkX3ML5Gj7M";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("API response error:", errorData); // Debug log
+                    throw new Error(`API error: ${response.status} - ${errorData.error.message || 'Unknown error'}`);
+                }
+
+                const result = await response.json();
+                console.log("Gemini API response:", result); // Debug log
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    console.error("Unexpected API response structure:", result);
+                    addMessage(`Oops! ${errorContextMessage} Please try again.`, 'bot');
+                    return null;
+                }
+
+            } catch (error) {
+                console.error("Error communicating with Gemini API:", error); // Debug log
+                addMessage(`Sorry, I'm having trouble with that right now. ${errorContextMessage}`, 'bot');
+                return null;
+            } finally {
+                setInteractiveElementsDisabled(false);
+                userInput.focus();
+            }
+        }
+
+        /**
+         * Handles sending messages, checking for specific Q&A first.
+         */
+        async function sendMessage() {
+            const userMessage = userInput.value.trim();
+            if (userMessage === '') return;
+
+            addMessage(userMessage, 'user');
+            userInput.value = '';
+
+            const lowerCaseMessage = userMessage.toLowerCase();
+            let botResponse = null;
+
+            // Check for specific questions about Ashok Kumar Ray or the chatbot's origin
+            if (lowerCaseMessage.includes("what is your name?") || lowerCaseMessage.includes("who are you?") || lowerCaseMessage.includes("who made you?") || lowerCaseMessage.includes("who is your creator?") || lowerCaseMessage.includes("who is your founder?")) {
+                botResponse = `My name is Ashok AI Chatbot, and I was created by ${ashokInfo.name} ,He from Brahampuri-2, Sarlahi, Nepal, but currently staying in Kathmandu. He studying in the science stream with a focus on computer science at Himalayan WhiteHouse International College, Tinkune. With a strong interest in technology and how it shapes the future, He diving deep into the world of coding, logic, and innovation—laying the foundation for a career that blends creativity with computation.`;
+            } else if (lowerCaseMessage.includes("where do you live?") || lowerCaseMessage.includes("what is your address?")) {
+                botResponse = `My creator, Ashok Kumar Ray, lives in ${ashokInfo.address}.`;
+            } else if (lowerCaseMessage.includes("where do you study?") || lowerCaseMessage.includes("what college do you attend?")) {
+                botResponse = `My creator, Ashok Kumar Ray, studies at ${ashokInfo.college}.`;
+            } else if (lowerCaseMessage.includes("who is ashok kumar ray?")) {
+                botResponse = `Ashok Kumar Ray is my creator. He lives in ${ashokInfo.address} and studies at ${ashokInfo.college}.`;
+            }
+
+            if (botResponse) {
+                addMessage(botResponse, 'bot');
+                // For predefined answers, we don't add them to chatHistory to avoid confusing the LLM
+                // if it's later asked to summarize or elaborate on these direct answers.
+            } else {
+                // If not a predefined question, send to Gemini API
+                chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
+                botResponse = await callGeminiAPI(chatHistory, "I didn't get a clear response.");
+                if (botResponse) {
+                    addMessage(botResponse, 'bot');
+                    chatHistory.push({ role: 'model', parts: [{ text: botResponse }] });
+                }
+            }
+        }
+
+        /**
+         * Summarizes the current chat conversation using the Gemini API.
+         */
+        async function summarizeChat() {
+            // Only summarize the actual LLM conversation history
+            const llmChatHistory = chatHistory.filter(entry => entry.role === 'user' || entry.role === 'model');
+
+            if (llmChatHistory.length === 0) {
+                addMessage("There's no conversation to summarize yet. Start chatting!", 'bot');
+                return;
+            }
+
+            const summaryPrompt = "Please provide a concise summary of the following conversation:";
+            const summaryChatHistory = [...llmChatHistory, { role: 'user', parts: [{ text: summaryPrompt }] }];
+
+            const summary = await callGeminiAPI(summaryChatHistory, "I couldn't summarize the chat.");
+            if (summary) {
+                addMessage(`✨ **Chat Summary:**\n\n${summary}`, 'bot');
+            }
+        }
+
+        /**
+         * Asks the Gemini API to elaborate on the last bot message.
+         */
+        async function elaborateLastMessage() {
+            // Find the last bot message in chat history (only from LLM interactions)
+            const lastBotMessage = chatHistory.slice().reverse().find(msg => msg.role === 'model');
+
+            if (!lastBotMessage) {
+                addMessage("There's no previous bot message from the AI to elaborate on.", 'bot');
+                return;
+            }
+
+            const elaborationPrompt = `Please elaborate on the following message: "${lastBotMessage.parts[0].text}"`;
+            const elaborationChatHistory = [...chatHistory, { role: 'user', parts: [{ text: elaborationPrompt }] }];
+
+            const elaboration = await callGeminiAPI(elaborationChatHistory, "I couldn't elaborate on the last message.");
+            if (elaboration) {
+                addMessage(`✨ **Elaboration:**\n\n${elaboration}`, 'bot');
+            }
+        }
+
+        /**
+         * Clears all messages from the chat display and resets chat history.
+         */
+        function clearChat() {
+            chatMessages.innerHTML = '<div class="message bot-message">Hello! How can I help you today?</div>';
+            chatHistory = [];
+            if (isDarkMode) {
+                chatMessages.querySelector('.bot-message').classList.add('dark-mode');
+            }
+        }
+
+        /**
+         * Toggles dark mode on and off.
+         */
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            chatContainer.classList.toggle('dark-mode', isDarkMode);
+            chatHeader.classList.toggle('dark-mode', isDarkMode);
+            ashokAiLabel.classList.toggle('dark-mode', isDarkMode);
+            chatMessages.classList.toggle('dark-mode', isDarkMode);
+            chatInputArea.classList.toggle('dark-mode', isDarkMode);
+            userInput.classList.toggle('dark-mode', isDarkMode);
+            loadingIndicator.classList.toggle('dark-mode', isDarkMode);
+            userIdDisplay.classList.toggle('dark-mode', isDarkMode);
+
+            document.querySelectorAll('.bot-message').forEach(msg => {
+                msg.classList.toggle('dark-mode', isDarkMode);
+            });
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        clearChatButton.addEventListener('click', clearChat);
+        summarizeChatButton.addEventListener('click', summarizeChat);
+        elaborateButton.addEventListener('click', elaborateLastMessage);
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+
+        // Focus on the input field when the page loads
+        window.onload = () => {
+            userInput.focus();
+        };
+    </script>
+</body>
+</html>
